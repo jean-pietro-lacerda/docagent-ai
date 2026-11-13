@@ -1,0 +1,23 @@
+{
+  "version": "synthetic-v1",
+  "documents": [
+    {"key": "edital", "pages": [
+      "As areas de selecao sao Sistemas Embarcados e Eletronica, Engenharia Mecanica e Inteligencia Artificial.",
+      "A bolsa mensal e R$ 1.234,56. As inscricoes terminam em 31/12/2026. Sao oferecidas 12 vagas."
+    ]},
+    {"key": "manual", "pages": [
+      "O dispositivo funciona com tensao de 3,3 V. A frequencia de operacao e 80 MHz.",
+      "A manutencao preventiva deve ocorrer a cada 6 meses. O suporte funciona de segunda a sexta."
+    ]}
+  ],
+  "questions": [
+    {"id": "areas", "document": "edital", "question": "Quais sao as areas de selecao?", "relevant_pages": [1], "expected": ["Sistemas Embarcados", "Engenharia Mecanica", "Inteligencia Artificial"]},
+    {"id": "bolsa", "document": "edital", "question": "Qual e o valor mensal da bolsa?", "relevant_pages": [2], "expected": ["R$ 1.234,56"]},
+    {"id": "prazo", "document": "edital", "question": "Quando terminam as inscricoes?", "relevant_pages": [2], "expected": ["31/12/2026"]},
+    {"id": "vagas", "document": "edital", "question": "Quantas vagas sao oferecidas?", "relevant_pages": [2], "expected": ["12 vagas"]},
+    {"id": "tensao", "document": "manual", "question": "Qual e a tensao de funcionamento?", "relevant_pages": [1], "expected": ["3,3 V"]},
+    {"id": "manutencao", "document": "manual", "question": "Qual e a periodicidade da manutencao preventiva?", "relevant_pages": [2], "expected": ["6 meses"]},
+    {"id": "uniforme", "document": "edital", "question": "Qual e a cor do uniforme obrigatorio?", "relevant_pages": [], "expected": []},
+    {"id": "garantia", "document": "manual", "question": "Quantos anos dura a garantia do produto?", "relevant_pages": [], "expected": []}
+  ]
+}

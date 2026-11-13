@@ -1,0 +1,75 @@
+x-api: &api
+  image: docagent-ai-api:local
+  build:
+    context: ..
+    dockerfile: backend/Dockerfile
+  environment:
+    APP_NAME: DocAgent AI
+    DEBUG: "false"
+    AUTH_ENABLED: "true"
+    REGISTRATION_ENABLED: ${REGISTRATION_ENABLED:-false}
+    JWT_SECRET_KEY: ${JWT_SECRET_KEY:?Configure JWT_SECRET_KEY no arquivo de ambiente Docker}
+    DATABASE_URL: postgresql+psycopg://docagent:${POSTGRES_PASSWORD:?Configure POSTGRES_PASSWORD hexadecimal}@postgres:5432/docagent_ai
+    STORAGE_DIR: /data/documents
+    EMBEDDINGS_CACHE_DIR: /data/models
+    GROQ_API_KEY: ${GROQ_API_KEY:-}
+    GROQ_MODEL: ${GROQ_MODEL:?Configure o identificador GROQ_MODEL no ambiente Docker}
+  volumes:
+    - documents_data:/data/documents
+    - models_data:/data/models
+  depends_on:
+    postgres:
+      condition: service_healthy
+
+services:
+  api:
+    <<: *api
+    ports:
+      - "127.0.0.1:${API_PORT:-8000}:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: frontend/Dockerfile
+      args:
+        VITE_API_URL: ""
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-5173}:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+
+  postgres:
+    image: pgvector/pgvector:0.8.7-pg18
+    environment:
+      POSTGRES_DB: docagent_ai
+      POSTGRES_USER: docagent
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Configure POSTGRES_PASSWORD hexadecimal}
+    volumes:
+      - postgres18_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U docagent -d docagent_ai"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    <<: *api
+    profiles: [setup]
+    command: [python, -m, alembic, upgrade, head]
+
+  prepare-model:
+    <<: *api
+    profiles: [setup]
+    command: [python, -m, app.cli.prepare_embeddings]
+
+volumes:
+  postgres18_data:
+  documents_data:
+  models_data:
